@@ -84,6 +84,8 @@ export default function UsersPage() {
   const [inviteLink, setInviteLink] = useState("")
   const [inviteForm, setInviteForm] = useState({ email: "", role: "STAFF" })
   const [inviteSentMessage, setInviteSentMessage] = useState("")
+  const [inviteError, setInviteError] = useState("");
+
 
   // User action dialog
   const [actionDialog, setActionDialog] = useState<{
@@ -138,12 +140,20 @@ export default function UsersPage() {
       setInviteSentMessage(`Invitation sent to ${inviteForm.email}`)
       // setTimeout(() => setInviteSentMessage(""), 5000)
     } catch (error: any) {
+      const message = error.response?.data?.message || "Please try again.";
+      if (message.includes("User already exists")) {
+        setInviteError("A user with this email already exists.");
+      } else {
+        setInviteError("");
+      }
+
       toast({
         title: "Failed to create invite",
-        description: error.response?.data?.message || "Please try again.",
+        description: message,
         variant: "destructive",
-      })
+      });
     }
+
   }
 
   const handleUserAction = async () => {
@@ -257,14 +267,16 @@ export default function UsersPage() {
                     <Input
                       placeholder="user@funaab.edu.ng"
                       value={inviteForm.email}
-                      onChange={(e) =>
-                        setInviteForm({
-                          ...inviteForm,
-                          email: e.target.value,
-                        })
-                      }
+                      onChange={(e) => {
+                        setInviteForm({ ...inviteForm, email: e.target.value });
+                        setInviteError("");
+                      }}
                     />
+                    {inviteError && (
+                      <p className="mt-1 text-sm text-red-600">{inviteError}</p>
+                    )}
                   </div>
+
                   <div>
                     <Label>Role</Label>
                     <select
