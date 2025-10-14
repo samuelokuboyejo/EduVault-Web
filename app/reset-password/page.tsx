@@ -1,43 +1,36 @@
 "use client"
 
-import { useState } from "react"
-import { useSearchParams, useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useToast } from "@/hooks/use-toast"
 import { authApi } from "@/lib/api"
-import { GraduationCap, Loader2, ArrowLeft, CheckCircle2 } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
+import { GraduationCap, Loader2, CheckCircle2, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
 export default function ResetPasswordPage() {
-    const searchParams = useSearchParams()
     const router = useRouter()
-    const token = searchParams.get("token")
-
+    const searchParams = useSearchParams()
     const { toast } = useToast()
+
+    const token = searchParams.get("token") || ""
+
     const [password, setPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
     const [isLoading, setIsLoading] = useState(false)
-    const [success, setSuccess] = useState(false)
+    const [isSuccess, setIsSuccess] = useState(false)
+    const [countdown, setCountdown] = useState(3)
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
         if (!token) {
             toast({
-                title: "Invalid reset link",
-                description: "The password reset link is missing or invalid.",
-                variant: "destructive",
-            })
-            return
-        }
-
-        if (password.length < 6) {
-            toast({
-                title: "Weak password",
-                description: "Password must be at least 6 characters long.",
+                title: "Invalid link",
+                description: "Reset token missing or invalid.",
                 variant: "destructive",
             })
             return
@@ -46,7 +39,7 @@ export default function ResetPasswordPage() {
         if (password !== confirmPassword) {
             toast({
                 title: "Passwords do not match",
-                description: "Please confirm your new password correctly.",
+                description: "Please make sure both fields are identical.",
                 variant: "destructive",
             })
             return
@@ -55,22 +48,38 @@ export default function ResetPasswordPage() {
         setIsLoading(true)
         try {
             await authApi.resetPassword(token, password)
-            setSuccess(true)
             toast({
                 title: "Password reset successful",
-                description: "You can now log in with your new password.",
+                description: "You will be redirected to login shortly.",
             })
-            setTimeout(() => router.push("/login"), 2500)
+            setIsSuccess(true)
         } catch (error: any) {
             toast({
                 title: "Reset failed",
-                description: error.response?.data?.message || "Something went wrong. Please try again.",
+                description: error.response?.data?.message || "Please try again.",
                 variant: "destructive",
             })
         } finally {
             setIsLoading(false)
         }
     }
+
+    useEffect(() => {
+        let timer: NodeJS.Timeout
+        if (isSuccess) {
+            timer = setInterval(() => {
+                setCountdown((prev) => {
+                    if (prev <= 1) {
+                        clearInterval(timer)
+                        router.push("/login")
+                        return 0
+                    }
+                    return prev - 1
+                })
+            }, 1000)
+        }
+        return () => clearInterval(timer)
+    }, [isSuccess, router])
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-background p-4">
@@ -81,34 +90,39 @@ export default function ResetPasswordPage() {
                     </div>
                     <CardTitle className="text-2xl font-bold">Reset Password</CardTitle>
                     <CardDescription>
-                        {success ? "Password successfully reset" : "Enter and confirm your new password"}
+                        {isSuccess
+                            ? "Your password has been successfully reset!"
+                            : "Enter your new password below."}
                     </CardDescription>
                 </CardHeader>
+
                 <CardContent>
-                    {!success ? (
+                    {!isSuccess ? (
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="space-y-2">
                                 <Label htmlFor="password">New Password</Label>
                                 <Input
                                     id="password"
                                     type="password"
-                                    placeholder="••••••••"
+                                    placeholder="Enter new password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
                                 />
                             </div>
+
                             <div className="space-y-2">
-                                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                                <Label htmlFor="confirm-password">Confirm Password</Label>
                                 <Input
-                                    id="confirmPassword"
+                                    id="confirm-password"
                                     type="password"
-                                    placeholder="••••••••"
+                                    placeholder="Re-enter new password"
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                     required
                                 />
                             </div>
+
                             <Button type="submit" className="w-full" disabled={isLoading}>
                                 {isLoading ? (
                                     <>
@@ -121,22 +135,32 @@ export default function ResetPasswordPage() {
                             </Button>
                         </form>
                     ) : (
-                        <div className="text-center space-y-4">
-                            <CheckCircle2 className="mx-auto h-10 w-10 text-green-600" />
-                            <p className="text-sm text-muted-foreground">
-                                Your password has been updated successfully.
+                        <div className="flex flex-col items-center space-y-4 text-center">
+                            <CheckCircle2 className="h-12 w-12 text-green-500" />
+                            <p className="text-muted-foreground">
+                                Redirecting to login in <strong>{countdown}</strong> seconds...
                             </p>
-                            <Button onClick={() => router.push("/login")} className="w-full">
-                                Go to Login
+                            <Button
+                                onClick={() => router.push("/login")}
+                                variant="outline"
+                                className="mt-2"
+                            >
+                                Go to Login Now
                             </Button>
                         </div>
                     )}
-                    <div className="mt-4 text-center">
-                        <Link href="/login" className="inline-flex items-center text-sm text-muted-foreground hover:text-primary">
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                            Back to login
-                        </Link>
-                    </div>
+
+                    {!isSuccess && (
+                        <div className="mt-4 text-center">
+                            <Link
+                                href="/login"
+                                className="inline-flex items-center text-sm text-muted-foreground hover:text-primary"
+                            >
+                                <ArrowLeft className="mr-2 h-4 w-4" />
+                                Back to login
+                            </Link>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
         </div>
