@@ -15,7 +15,7 @@ import { Tabs, TabsList, TabsContent, TabsTrigger } from "@/components/ui/tabs"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { StatusBadge } from "@/components/status-badge"
-import { receiptApi, analyticsApi } from "@/lib/api"
+import { receiptApi, analyticsApi, authApi } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
 import { FileCheck, TrendingUp, Users, Calendar, Download, Loader2, FileText, Eye, CheckCircle2, XCircle, X } from "lucide-react"
 import { format } from "date-fns"
@@ -44,6 +44,9 @@ const CATEGORIES: { key: CategoryKey; label: string }[] = [
 
 export default function AdminDashboard() {
   const { toast } = useToast()
+
+  const [user, setUser] = useState<{ firstName?: string }>({})
+
 
   // analytics
   const [loadingAnalytics, setLoadingAnalytics] = useState(true)
@@ -103,6 +106,23 @@ export default function AdminDashboard() {
 
     fetchAnalytics()
   }, [toast])
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await authApi.getCurrentUser()
+        setUser(res.data)
+        toast({
+          title: `Welcome${res.data.firstName ? `, ${res.data.firstName}` : ""}! 👋`,
+          description: "Glad to have you back.",
+        })
+      } catch (err) {
+        console.error("Failed to fetch user:", err)
+      }
+    }
+    fetchUser()
+  }, [toast])
+
 
   const fetchReceipts = async (category: CategoryKey) => {
     setLoadingReceipts((p) => ({ ...p, [category]: true }))
@@ -270,6 +290,13 @@ export default function AdminDashboard() {
               </Button>
             </div>
           </div>
+
+          {user?.firstName && (
+            <h2 className="text-xl font-semibold text-primary">
+              Welcome back, {user.firstName}!
+            </h2>
+          )}
+
 
           {/* Analytics summary cards */}
           <div className="grid gap-4 md:grid-cols-4">

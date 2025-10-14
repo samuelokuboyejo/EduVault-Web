@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { AuthGuard } from "@/components/auth-guard"
 import { StaffNav } from "@/components/staff-nav"
+import { authApi } from "@/lib/api"
 import {
   Card,
   CardContent,
@@ -59,6 +60,7 @@ const categories = [
 
 export default function StaffDashboard() {
   const { toast } = useToast()
+  const [user, setUser] = useState<{ firstName?: string }>({})
   const [receipts, setReceipts] = useState<Record<string, Receipt[]>>({})
   const [loading, setLoading] = useState<Record<string, boolean>>({})
   const [downloadLoading, setDownloadLoading] = useState<Record<string, boolean>>({})
@@ -73,6 +75,22 @@ export default function StaffDashboard() {
   const [previewOpen, setPreviewOpen] = useState(false)
   const [viewingReceipt, setViewingReceipt] = useState<{ url: string; fileName?: string; type?: string } | null>(null)
   const [previewLoading, setPreviewLoading] = useState(false)
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await authApi.getCurrentUser()
+        setUser(res.data)
+        toast({
+          title: `Welcome${res.data.firstName ? `, ${res.data.firstName}` : ""}! 👋`,
+          description: "Glad to have you back.",
+        })
+      } catch (err) {
+        console.error("Failed to fetch user:", err)
+      }
+    }
+    fetchUser()
+  }, [toast])
 
   // 🔹 Fetch receipts
   const fetchReceipts = async (category: string) => {
@@ -90,6 +108,9 @@ export default function StaffDashboard() {
       setLoading((prev) => ({ ...prev, [category]: false }))
     }
   }
+
+
+
 
   // 🔹 Download all
   const handleDownloadAll = async (category: string) => {
@@ -219,6 +240,14 @@ export default function StaffDashboard() {
             <h1 className="text-3xl font-bold">Approve Receipts</h1>
             <p className="text-muted-foreground">Review, preview, and manage student receipt submissions.</p>
           </div>
+
+          {user?.firstName && (
+            <h2 className="text-xl font-semibold text-primary">
+              Welcome back, {user.firstName}!
+            </h2>
+          )}
+
+
 
           {/* Stats */}
           <div className="mb-6 grid gap-4 md:grid-cols-3">
