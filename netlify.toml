@@ -3,3 +3,10 @@
   to = "http://eduvault.eu-north-1.elasticbeanstalk.com/:splat"
   status = 200
   force = true
+
+
+[[redirects]]
+  from = "/ws"
+  to = "http://eduvault.eu-north-1.elasticbeanstalk.com/ws"
+  status = 200
+  force = true
