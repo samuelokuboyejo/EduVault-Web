@@ -144,7 +144,7 @@ export default function StudentDashboard() {
             transition={{ duration: 0.7, ease: "easeOut" }}
           >
             <h1 className="text-2xl md:text-3xl font-bold mb-1">
-              {greeting}, {user?.matricNumber || "Student"} 👋
+              {greeting}, {user?.matricNumber || "Student"} 
             </h1>
             <p className="text-muted-foreground">
               Welcome back! Here’s an overview of your uploaded receipts.
