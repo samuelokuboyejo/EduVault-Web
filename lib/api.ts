@@ -74,6 +74,10 @@ export const authApi = {
 
   forgotPassword: (email: string) => api.post("/auth/forgot-password", { email }),
 
+  resetPassword: (token: string, newPassword: string) =>
+     api.post(`/auth/reset-password?token=${token}`, { newPassword }),
+
+
   changeRole: (email: string, role: string) => api.post("/auth/change-role", { email, role }),
 
   getCurrentUser: ()=> api.get("/users/me"),
