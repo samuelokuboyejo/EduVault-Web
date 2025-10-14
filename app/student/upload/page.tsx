@@ -92,7 +92,9 @@ export default function UploadPage() {
     if (blocked[category]) {
       toast({
         title: "Duplicate Upload",
-        description: blockedMessage[category] || "You cannot upload another receipt for this level.",
+        description:
+          blockedMessage[category] ||
+          "You cannot upload another receipt for this level.",
         variant: "destructive",
       })
       return
@@ -158,37 +160,51 @@ export default function UploadPage() {
 
   return (
     <AuthGuard allowedRoles={["STUDENT"]}>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
         <StudentNav />
-        <main className="mx-auto max-w-7xl p-4 py-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold">Upload Receipts</h1>
-            <p className="text-muted-foreground">Submit your receipts for approval</p>
+        <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <div className="mb-10 text-center md:text-left">
+            <h1 className="text-2xl md:text-3xl font-bold mb-1">
+              Upload Receipts 📤
+            </h1>
+            <p className="text-muted-foreground">
+              Submit your payment receipts for verification and approval.
+            </p>
           </div>
 
-          <Tabs defaultValue={categories[0].key} className="space-y-4">
-            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6">
-              {categories.map((cat) => (
-                <TabsTrigger key={cat.key} value={cat.key} className="text-xs lg:text-sm">
-                  {cat.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+          {/* ✅ HORIZONTAL SCROLLABLE TABS */}
+          <Tabs defaultValue={categories[0].key} className="space-y-6">
+            <div className="overflow-x-auto scrollbar-hide">
+              <TabsList className="flex w-max gap-2 min-w-full rounded-xl bg-muted/40 p-1">
+                {categories.map((cat) => (
+                  <TabsTrigger
+                    key={cat.key}
+                    value={cat.key}
+                    className="flex-shrink-0 rounded-lg text-xs sm:text-sm py-2 px-3 transition-all whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  >
+                    {cat.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
 
             {categories.map((cat) => (
               <TabsContent key={cat.key} value={cat.key}>
-                <Card>
+                <Card className="border-0 shadow-sm hover:shadow-md transition">
                   <CardHeader>
                     <CardTitle>Upload {cat.label}</CardTitle>
                     <CardDescription>
                       Upload your {cat.label.toLowerCase()} receipt as a PDF file
                     </CardDescription>
                   </CardHeader>
+
                   <CardContent className="space-y-4">
                     {blocked[cat.key] && (
                       <div className="flex items-center gap-2 bg-red-100 text-red-800 p-3 rounded-md border border-red-300">
                         <AlertTriangle className="h-5 w-5 shrink-0" />
-                        <p className="text-sm font-medium">{blockedMessage[cat.key]}</p>
+                        <p className="text-sm font-medium">
+                          {blockedMessage[cat.key]}
+                        </p>
                       </div>
                     )}
 
@@ -198,7 +214,9 @@ export default function UploadPage() {
                         id={`${cat.key}-level`}
                         className="w-full border rounded px-3 py-2"
                         value={studentLevel[cat.key] || ""}
-                        onChange={(e) => handleLevelChange(cat.key, e.target.value)}
+                        onChange={(e) =>
+                          handleLevelChange(cat.key, e.target.value)
+                        }
                       >
                         <option value="">Select Level</option>
                         {levels.map((lvl) => (
@@ -210,12 +228,16 @@ export default function UploadPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor={`${cat.key}-file`}>Receipt File (PDF)</Label>
+                      <Label htmlFor={`${cat.key}-file`}>
+                        Receipt File (PDF)
+                      </Label>
                       <Input
                         id={`${cat.key}-file`}
                         type="file"
                         accept=".pdf"
-                        onChange={(e) => handleFileChange(cat.key, e.target.files?.[0] || null)}
+                        onChange={(e) =>
+                          handleFileChange(cat.key, e.target.files?.[0] || null)
+                        }
                       />
                     </div>
 
@@ -230,7 +252,11 @@ export default function UploadPage() {
 
                     <Button
                       onClick={() => handleUpload(cat.key)}
-                      disabled={uploading[cat.key] || success[cat.key] || blocked[cat.key]}
+                      disabled={
+                        uploading[cat.key] ||
+                        success[cat.key] ||
+                        blocked[cat.key]
+                      }
                       className="w-full"
                     >
                       {uploading[cat.key] ? (
