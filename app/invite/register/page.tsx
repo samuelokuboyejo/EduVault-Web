@@ -3,7 +3,13 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -21,6 +27,7 @@ export default function InviteRegisterPage() {
     const [loading, setLoading] = useState(false)
     const [signingIn, setSigningIn] = useState(false)
     const [token, setToken] = useState<string | null>(null)
+    const [inviteError, setInviteError] = useState<string | null>(null)
     const [profileImage, setProfileImage] = useState<File | null>(null)
     const [imagePreview, setImagePreview] = useState<string | null>(null)
     const [formData, setFormData] = useState({
@@ -33,16 +40,11 @@ export default function InviteRegisterPage() {
     useEffect(() => {
         const tokenParam = searchParams.get("token")
         if (!tokenParam) {
-            toast({
-                title: "Invalid invitation",
-                description: "No invitation token found",
-                variant: "destructive",
-            })
-            router.push("/login")
+            setInviteError("Invalid invitation link. Please check the link or request a new one.")
         } else {
             setToken(tokenParam)
         }
-    }, [searchParams, router, toast])
+    }, [searchParams])
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
@@ -71,11 +73,7 @@ export default function InviteRegisterPage() {
         e.preventDefault()
 
         if (!token) {
-            toast({
-                title: "Invalid invitation",
-                description: "No invitation token found",
-                variant: "destructive",
-            })
+            setInviteError("Invalid invitation link. Please check the link or request a new one.")
             return
         }
 
@@ -136,9 +134,7 @@ export default function InviteRegisterPage() {
                 description: welcomeMsg,
             })
 
-            // Signing-in overlay
             setSigningIn(true)
-
             setTimeout(() => {
                 if (userRole === "ADMIN") router.push("/admin/dashboard")
                 else if (userRole === "STAFF") router.push("/staff/dashboard")
@@ -146,16 +142,46 @@ export default function InviteRegisterPage() {
             }, 1500)
         } catch (error: any) {
             console.error("Registration error:", error)
-            toast({
-                title: "Registration failed",
-                description: error.response?.data?.message || "Invalid or expired invitation",
-                variant: "destructive",
-            })
+            const message = error.response?.data?.message || "Invalid or expired invitation"
+
+            if (message.includes("Invalid invitation")) {
+                setInviteError("Invalid invitation link. Please check the link or request a new one.")
+            } else if (message.includes("expired") || message.includes("already used")) {
+                setInviteError("This invitation link has expired or has already been used.")
+            } else {
+                toast({
+                    title: "Registration failed",
+                    description: message,
+                    variant: "destructive",
+                })
+            }
         } finally {
             setLoading(false)
         }
     }
 
+    // 🎯 Error Screen (Invalid or Expired Invitation)
+    if (inviteError) {
+        return (
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                className="flex min-h-screen flex-col items-center justify-center p-6 text-center bg-background"
+            >
+                <div className="mb-6 flex flex-col items-center">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-100 mb-4">
+                        <X className="h-8 w-8 text-red-600" />
+                    </div>
+                    <h2 className="text-2xl font-semibold mb-2">Invitation Error</h2>
+                    <p className="text-muted-foreground mb-6">{inviteError}</p>
+                    <Button onClick={() => router.push("/login")}>Go to Login</Button>
+                </div>
+            </motion.div>
+        )
+    }
+
+    // ⏳ Loading while verifying token
     if (!token) {
         return (
             <div className="flex min-h-screen items-center justify-center bg-background">
@@ -171,7 +197,7 @@ export default function InviteRegisterPage() {
             transition={{ duration: 0.5 }}
             className="relative flex min-h-screen flex-col items-center justify-center bg-background p-4"
         >
-            {/* --- EduVault Logo + Welcome Message --- */}
+            {/* --- EduVault Logo + Welcome --- */}
             <div className="mb-6 flex flex-col items-center text-center">
                 <div className="flex items-center gap-2 mb-2">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary shadow-md">
@@ -185,11 +211,13 @@ export default function InviteRegisterPage() {
                 </p>
             </div>
 
-            {/* Registration Form */}
+            {/* --- Registration Form --- */}
             <Card className="w-full max-w-md shadow-md">
                 <CardHeader>
                     <CardTitle className="text-2xl">Complete Your Registration</CardTitle>
-                    <CardDescription>Create your account to access EduVault’s platform</CardDescription>
+                    <CardDescription>
+                        Create your account to access EduVault’s platform
+                    </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-4">
@@ -200,7 +228,9 @@ export default function InviteRegisterPage() {
                                 type="text"
                                 placeholder="John"
                                 value={formData.firstName}
-                                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                                onChange={(e) =>
+                                    setFormData({ ...formData, firstName: e.target.value })
+                                }
                                 required
                             />
                         </div>
@@ -212,7 +242,9 @@ export default function InviteRegisterPage() {
                                 type="text"
                                 placeholder="Doe"
                                 value={formData.lastName}
-                                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                                onChange={(e) =>
+                                    setFormData({ ...formData, lastName: e.target.value })
+                                }
                                 required
                             />
                         </div>
@@ -224,7 +256,9 @@ export default function InviteRegisterPage() {
                                 type="password"
                                 placeholder="••••••••"
                                 value={formData.password}
-                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                onChange={(e) =>
+                                    setFormData({ ...formData, password: e.target.value })
+                                }
                                 required
                             />
                         </div>
@@ -237,7 +271,10 @@ export default function InviteRegisterPage() {
                                 placeholder="••••••••"
                                 value={formData.confirmPassword}
                                 onChange={(e) =>
-                                    setFormData({ ...formData, confirmPassword: e.target.value })
+                                    setFormData({
+                                        ...formData,
+                                        confirmPassword: e.target.value,
+                                    })
                                 }
                                 required
                             />
@@ -300,7 +337,7 @@ export default function InviteRegisterPage() {
                 </CardContent>
             </Card>
 
-            {/* Signing In Overlay */}
+            {/* --- Signing In Overlay --- */}
             {signingIn && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
                     <div className="flex items-center gap-3 rounded-lg bg-white p-6 shadow-lg">
