@@ -10,6 +10,9 @@ import Providers from './providers'
 export const metadata: Metadata = {
   title: 'EduVault',
   description: 'Sign in and manage your account',
+  icons: {
+    icon: "/logo.png",
+  },
 }
 
 export default function RootLayout({

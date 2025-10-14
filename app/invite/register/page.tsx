@@ -160,7 +160,6 @@ export default function InviteRegisterPage() {
         }
     }
 
-    // 🎯 Error Screen (Invalid or Expired Invitation)
     if (inviteError) {
         return (
             <motion.div
@@ -181,7 +180,6 @@ export default function InviteRegisterPage() {
         )
     }
 
-    // ⏳ Loading while verifying token
     if (!token) {
         return (
             <div className="flex min-h-screen items-center justify-center bg-background">
@@ -197,7 +195,6 @@ export default function InviteRegisterPage() {
             transition={{ duration: 0.5 }}
             className="relative flex min-h-screen flex-col items-center justify-center bg-background p-4"
         >
-            {/* --- EduVault Logo + Welcome --- */}
             <div className="mb-6 flex flex-col items-center text-center">
                 <div className="flex items-center gap-2 mb-2">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary shadow-md">
@@ -211,7 +208,6 @@ export default function InviteRegisterPage() {
                 </p>
             </div>
 
-            {/* --- Registration Form --- */}
             <Card className="w-full max-w-md shadow-md">
                 <CardHeader>
                     <CardTitle className="text-2xl">Complete Your Registration</CardTitle>
@@ -337,7 +333,6 @@ export default function InviteRegisterPage() {
                 </CardContent>
             </Card>
 
-            {/* --- Signing In Overlay --- */}
             {signingIn && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
                     <div className="flex items-center gap-3 rounded-lg bg-white p-6 shadow-lg">
