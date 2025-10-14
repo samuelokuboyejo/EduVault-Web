@@ -35,7 +35,7 @@ export function NotificationBadge({ className }: { className?: string }) {
     }
 
     const connectWebSocket = () => {
-      const socket = new SockJS("/ws")
+      const socket = new SockJS(`${process.env.NEXT_PUBLIC_API_BASE_URL}/ws`)
 
       const client = new Client({
         webSocketFactory: () => socket,
