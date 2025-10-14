@@ -35,7 +35,7 @@ export function NotificationBadge({ className }: { className?: string }) {
     }
 
     const connectWebSocket = () => {
-      const socket = new SockJS("http://eduvault.eu-north-1.elasticbeanstalk.com/ws")
+      const socket = new SockJS("/ws")
 
       const client = new Client({
         webSocketFactory: () => socket,
