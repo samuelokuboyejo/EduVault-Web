@@ -1,0 +1,5 @@
+[[redirects]]
+  from = "/api/*"
+  to = "http://eduvault.eu-north-1.elasticbeanstalk.com/:splat"
+  status = 200
+  force = true

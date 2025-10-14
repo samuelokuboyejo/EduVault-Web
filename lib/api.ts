@@ -1,6 +1,6 @@
 import axios, { type AxiosError } from "axios"
 
-const API_BASE_URL = "http://eduvault.eu-north-1.elasticbeanstalk.com"
+const API_BASE_URL = "/api"
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
@@ -9,8 +9,7 @@ export const api = axios.create({
   },
 })
 
-// Request interceptor to add auth token
-api.interceptors.request.use(
+ api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("accessToken")
     if (token) {
@@ -21,7 +20,6 @@ api.interceptors.request.use(
   (error) => Promise.reject(error),
 )
 
-// Response interceptor to handle token refresh
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
