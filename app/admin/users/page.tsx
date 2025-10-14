@@ -39,7 +39,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { adminApi, analyticsApi } from "@/lib/api"
+import { adminApi, analyticsApi, authApi } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
 import {
   UserPlus,
@@ -93,6 +93,12 @@ export default function UsersPage() {
     user: PrivilegedUser | null
     action: "suspend" | "deactivate" | "activate" | "delete" | null
   }>({ open: false, user: null, action: null })
+
+  const [changeRoleDialog, setChangeRoleDialog] = useState<{
+    open: boolean
+    user: PrivilegedUser | null
+  }>({ open: false, user: null })
+
 
   useEffect(() => {
     fetchAll()
@@ -542,6 +548,18 @@ export default function UsersPage() {
                               >
                                 <Trash2 className="mr-2 h-4 w-4" /> Delete
                               </DropdownMenuItem>
+                              
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  setChangeRoleDialog({
+                                    open: true,
+                                    user: u,
+                                  })
+                                }
+                              >
+                                <UserPlus className="mr-2 h-4 w-4" /> Change Role
+                              </DropdownMenuItem>
+
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </div>
@@ -581,6 +599,57 @@ export default function UsersPage() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        <Dialog open={changeRoleDialog.open} onOpenChange={(open) => setChangeRoleDialog({ ...changeRoleDialog, open })}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Change Role</DialogTitle>
+              <DialogDescription>
+                Change the role of <strong>{changeRoleDialog.user?.email}</strong>
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <Label>New Role</Label>
+              <select
+                className="w-full rounded-md border border-input bg-background p-2"
+                defaultValue={changeRoleDialog.user?.role}
+                onChange={(e) => setChangeRoleDialog({
+                  ...changeRoleDialog,
+                  user: changeRoleDialog.user ? { ...changeRoleDialog.user, role: e.target.value } : null
+                })}
+              >
+                <option value="STAFF">Staff</option>
+                <option value="ADMIN">Admin</option>
+              </select>
+
+              <Button
+                className="w-full"
+                onClick={async () => {
+                  if (!changeRoleDialog.user) return;
+                  try {
+                    await authApi.changeRole(changeRoleDialog.user.email, changeRoleDialog.user.role);
+                    toast({
+                      title: "Role updated",
+                      description: `Role changed to ${changeRoleDialog.user.role}`,
+                    });
+                    fetchAll();
+                    setChangeRoleDialog({ open: false, user: null });
+                  } catch (error: any) {
+                    toast({
+                      title: "Failed to update role",
+                      description: error.response?.data?.message || "Please try again.",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+              >
+                Update Role
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
       </div>
     </AuthGuard>
   )
