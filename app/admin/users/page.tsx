@@ -136,7 +136,7 @@ export default function UsersPage() {
         description: `Invite sent to ${inviteForm.email}`,
       })
       setInviteSentMessage(`Invitation sent to ${inviteForm.email}`)
-      setTimeout(() => setInviteSentMessage(""), 5000)
+      // setTimeout(() => setInviteSentMessage(""), 5000)
     } catch (error: any) {
       toast({
         title: "Failed to create invite",
@@ -250,6 +250,7 @@ export default function UsersPage() {
                   <DialogTitle>Create Invitation</DialogTitle>
                   <DialogDescription>Invite a staff or admin</DialogDescription>
                 </DialogHeader>
+
                 <div className="space-y-4">
                   <div>
                     <Label>Email Address</Label>
@@ -277,19 +278,42 @@ export default function UsersPage() {
                       <option value="ADMIN">Admin</option>
                     </select>
                   </div>
+
                   <Button onClick={handleCreateInvite} className="w-full">
                     Generate Link
                   </Button>
-                  {inviteLink && (
-                    <div className="mt-3">
-                      <Label>Invitation Link</Label>
-                      <div className="rounded-md border bg-muted p-2 break-all text-sm">
+
+                  {/* Inline confirmation popup */}
+                  {inviteSentMessage && (
+                    <div className="mt-4 rounded-md border border-green-500/50 bg-green-100/20 p-3 flex flex-col gap-2 text-sm">
+                      <div className="flex items-center justify-between">
+                        <p className="text-green-700 font-medium flex items-center gap-2">
+                          <CheckCircle2 className="h-4 w-4 text-green-600" />
+                          {inviteSentMessage}
+                        </p>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            navigator.clipboard.writeText(inviteLink)
+                            toast({
+                              title: "Copied!",
+                              description: "Invitation link copied to clipboard.",
+                            })
+                          }}
+                        >
+                          Copy Link
+                        </Button>
+                      </div>
+
+                      <div className="rounded-md border bg-muted p-2 break-all text-xs text-muted-foreground">
                         {inviteLink}
                       </div>
                     </div>
                   )}
                 </div>
               </DialogContent>
+
             </Dialog>
           </div>
 
