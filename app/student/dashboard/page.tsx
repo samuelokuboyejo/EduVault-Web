@@ -152,7 +152,6 @@ export default function StudentDashboard() {
           </motion.div>
 
           <Tabs defaultValue={categories[0].key} className="space-y-6">
-            {/* ✅ Responsive + Scrollable TabsList */}
             <div className="overflow-x-auto">
               <TabsList className="flex gap-2 min-w-max sm:grid sm:grid-cols-3 lg:grid-cols-6 rounded-xl bg-muted/40 p-1">
                 {categories.map((cat) => (
@@ -242,10 +241,10 @@ export default function StudentDashboard() {
                                   </div>
 
                                   <div className="space-y-1 text-xs text-muted-foreground dark:text-gray-400">
-                                    {receipt.amount && <p>💰 Amount: {receipt.amount}</p>}
-                                    {receipt.matricNumber && <p>🎓 Matric No: {receipt.matricNumber}</p>}
-                                    {receipt.level && <p>📘 Level: {receipt.level}</p>}
-                                    {receipt.RRR && <p>🧾 RRR: {receipt.RRR}</p>}
+                                    {receipt.amount && <p> Amount: {receipt.amount}</p>}
+                                    {receipt.matricNumber && <p> Matric No: {receipt.matricNumber}</p>}
+                                    {receipt.level && <p> Level: {receipt.level}</p>}
+                                    {receipt.RRR && <p> RRR: {receipt.RRR}</p>}
                                   </div>
                                 </div>
                               </motion.div>
