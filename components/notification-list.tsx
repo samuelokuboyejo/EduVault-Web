@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Bell, Check, Loader2 } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
+import { useNotificationContext } from "@/app/context/NotificationContext"
 
 interface Notification {
   id: string
@@ -19,6 +20,7 @@ interface Notification {
 
 export function NotificationList() {
   const { toast } = useToast()
+  const { refreshUnreadCount } = useNotificationContext()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<{ role?: string; fullName?: string }>({})
@@ -42,12 +44,10 @@ export function NotificationList() {
     try {
       const response = await notificationsApi.getAll()
       const data = response.data.content || response.data || []
-
       const normalized = (Array.isArray(data) ? data : []).map((n: any) => ({
         ...n,
         read: n.read ?? n.readStatus ?? false,
       }))
-
       setNotifications(normalized)
     } catch (error: any) {
       toast({
@@ -70,6 +70,7 @@ export function NotificationList() {
       setNotifications((prev) =>
         prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n))
       )
+      await refreshUnreadCount()
     } catch (error: any) {
       toast({
         title: "Failed to mark as read",
@@ -83,6 +84,7 @@ export function NotificationList() {
     try {
       await notificationsApi.markAllAsRead()
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
+      await refreshUnreadCount()
       toast({ title: "All notifications marked as read" })
     } catch (error: any) {
       toast({
