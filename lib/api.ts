@@ -24,9 +24,12 @@ api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as any
+    const status = error.response?.status
+    const currentPath = window.location.pathname
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
-    // if ((error.response?.status === 401 || error.response?.status === 403) && !originalRequest._retry) {
+    const isAuthPage = currentPath.startsWith("/login") || currentPath.startsWith("/register")
+
+    if ((status === 401 || status === 403) && !originalRequest._retry && !isAuthPage) {
     originalRequest._retry = true
 
       try {
