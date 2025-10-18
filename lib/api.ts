@@ -47,12 +47,9 @@ api.interceptors.response.use(
         console.warn("Session expired — redirecting to login");
         localStorage.removeItem("accessToken")
         localStorage.removeItem("refreshToken")
-
+        
         if (typeof window !== "undefined") {
-          const currentPath = window.location.pathname
-          if (!["/login", "/register"].includes(currentPath)) {
-            window.location.href = "/login"
-          }
+          window.location.href = "/login";
         }
           return Promise.reject(refreshError)
       }
