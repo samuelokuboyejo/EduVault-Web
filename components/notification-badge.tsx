@@ -42,7 +42,6 @@ export function NotificationBadge({ className }: { className?: string }) {
     }
   }
 
-  // Optional: click outside to close
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {

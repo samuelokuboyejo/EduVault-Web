@@ -25,7 +25,7 @@ api.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as any
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 || error.response?.status === 403 && !originalRequest._retry) {
       originalRequest._retry = true
 
       try {
@@ -35,7 +35,7 @@ api.interceptors.response.use(
         }
 
         const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-          refreshToken,
+          refreshToken
         })
 
         const { accessToken } = response.data
@@ -44,15 +44,18 @@ api.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${accessToken}`
         return api(originalRequest)
       } catch (refreshError) {
+        console.warn("Session expired — redirecting to login");
         localStorage.removeItem("accessToken")
         localStorage.removeItem("refreshToken")
-        window.location.href = "/login"
-        return Promise.reject(refreshError)
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+          return Promise.reject(refreshError)
       }
     }
 
     return Promise.reject(error)
-  },
+  }
 )
 
 // Auth API
