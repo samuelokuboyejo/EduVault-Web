@@ -82,10 +82,10 @@ export default function AdminSettingsPage() {
               <div className="flex items-center justify-between border-b pb-4">
                 <div className="space-y-1">
                   <Label htmlFor="autoApproval" className="text-base font-medium">
-                    Automate Receipt Approval/Rejection
+                    Automated Receipt Approval
                   </Label>
                   <p className="text-sm text-muted-foreground">
-                    Automatically approve valid receipts or reject invalid ones.
+                      When enabled, receipts will be auto-approved or rejected.
                   </p>
                 </div>
                 <Switch
@@ -95,7 +95,6 @@ export default function AdminSettingsPage() {
                 />
               </div>
 
-              {/* Additional settings can be added here later */}
             </CardContent>
 
             {isDirty && (
@@ -120,6 +119,9 @@ export default function AdminSettingsPage() {
               </CardFooter>
             )}
           </Card>
+
+
+          
         </main>
       </div>
     </AuthGuard>
