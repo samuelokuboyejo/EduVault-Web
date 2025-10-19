@@ -85,8 +85,7 @@ export default function AdminSettingsPage() {
                     Automate Receipt Approval/Rejection
                   </Label>
                   <p className="text-sm text-muted-foreground">
-                    Automatically approve valid receipts or reject invalid ones
-                    with a reason detected by the backend.
+                    Automatically approve valid receipts or reject invalid ones.
                   </p>
                 </div>
                 <Switch
