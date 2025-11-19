@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   title: 'EduVault',
   description: 'Sign in and manage your account',
   icons: {
-    icon: "/logo.png",
+    icon: "/logo1.svg",
   },
 }
 
