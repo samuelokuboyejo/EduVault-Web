@@ -33,7 +33,7 @@ const PUBLIC_PATHS = [
 api.interceptors.request.use(
   (config) => {
     const isPublic = PUBLIC_PATHS.some((path) =>
-      config.url?.startsWith(path)
+      config.url?.split("?")[0].startsWith(path)
     )
 
     if (!isPublic) {
