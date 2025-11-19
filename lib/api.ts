@@ -22,18 +22,6 @@ const PUBLIC_PATHS = [
 const AUTH_PATHS = ["/login", "/register", "/invite/register"]
 
 
-
-//  api.interceptors.request.use(
-//   (config) => {
-//     const token = localStorage.getItem("accessToken")
-//     if (token) {
-//       config.headers.Authorization = `Bearer ${token}`
-//     }
-//     return config
-//   },
-//   (error) => Promise.reject(error),
-// )
-
 api.interceptors.request.use(
   (config) => {
     const cleanUrl = config.url?.split("?")[0] || ""
