@@ -19,6 +19,10 @@ const PUBLIC_PATHS = [
   "/auth/reset-password",
 ]
 
+const AUTH_PATHS = ["/login", "/register", "/invite/register"]
+
+
+
 //  api.interceptors.request.use(
 //   (config) => {
 //     const token = localStorage.getItem("accessToken")
@@ -32,8 +36,10 @@ const PUBLIC_PATHS = [
 
 api.interceptors.request.use(
   (config) => {
+    const cleanUrl = config.url?.split("?")[0] || ""
+
     const isPublic = PUBLIC_PATHS.some((path) =>
-      config.url?.split("?")[0].startsWith(path)
+      cleanUrl.startsWith(path)
     )
 
     if (!isPublic) {
@@ -50,41 +56,44 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
   (response) => response,
+
   async (error: AxiosError) => {
     const originalRequest = error.config as any
     const status = error.response?.status
     const currentPath = window.location.pathname
 
-    const isAuthPage = currentPath.startsWith("/login") || currentPath.startsWith("/register")
+    const isAuthPage = AUTH_PATHS.some((p) =>
+      currentPath.startsWith(p)
+    )
 
     if ((status === 401 || status === 403) && !originalRequest._retry && !isAuthPage) {
-    originalRequest._retry = true
+      originalRequest._retry = true
 
       try {
         const refreshToken = localStorage.getItem("refreshToken")
-        if (!refreshToken) {
-          throw new Error("No refresh token")
-        }
+        if (!refreshToken) throw new Error("No refresh token")
 
         const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
           refreshToken,
         })
 
         const { accessToken, refreshToken: newRefreshToken } = response.data
+
         localStorage.setItem("accessToken", accessToken)
         localStorage.setItem("refreshToken", newRefreshToken)
 
-
         originalRequest.headers.Authorization = `Bearer ${accessToken}`
         return api(originalRequest)
+
       } catch (refreshError) {
+        // Refresh failed → log out
         localStorage.removeItem("accessToken")
         localStorage.removeItem("refreshToken")
-        // window.location.href = "/login"
 
         setTimeout(() => {
           window.location.href = "/login"
         }, 300)
+
         return Promise.reject(refreshError)
       }
     }
@@ -92,6 +101,7 @@ api.interceptors.response.use(
     return Promise.reject(error)
   },
 )
+
 
 // Auth API
 export const authApi = {
