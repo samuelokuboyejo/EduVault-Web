@@ -9,12 +9,40 @@ export const api = axios.create({
   },
 })
 
- api.interceptors.request.use(
+
+const PUBLIC_PATHS = [
+  "/auth/login",
+  "/auth/register",
+  "/auth/register/student",
+  "/auth/google",
+  "/auth/forgot-password",
+  "/auth/reset-password",
+]
+
+//  api.interceptors.request.use(
+//   (config) => {
+//     const token = localStorage.getItem("accessToken")
+//     if (token) {
+//       config.headers.Authorization = `Bearer ${token}`
+//     }
+//     return config
+//   },
+//   (error) => Promise.reject(error),
+// )
+
+api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("accessToken")
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+    const isPublic = PUBLIC_PATHS.some((path) =>
+      config.url?.startsWith(path)
+    )
+
+    if (!isPublic) {
+      const token = localStorage.getItem("accessToken")
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`
+      }
     }
+
     return config
   },
   (error) => Promise.reject(error),
